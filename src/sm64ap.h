@@ -50,8 +50,9 @@ extern "C" void SM64AP_SendItem(int);
 // Print Next Message to Screen
 extern "C" void SM64AP_PrintNext();
 
-// Called when Story completed, sends StatusUpdate
-extern "C" void SM64AP_StoryComplete();
+// Called on each Bowser stage completion, i is bowser index. Will send StoryComplete depending on completion option.
+extern "C" void SM64AP_FinishBowser(int i);
+
 #else
 void SM64AP_InitMW(const char*, const char*, const char*);
 void SM64AP_InitSP(const char*);
@@ -73,5 +74,5 @@ void SM64AP_DeathLinkSend();
 void SM64AP_SendByBoxID(int);
 void SM64AP_SendItem(int);
 void SM64AP_PrintNext();
-void SM64AP_StoryComplete();
+void SM64AP_FinishBowser(int);
 #endif

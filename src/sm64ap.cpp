@@ -24,6 +24,7 @@ bool sm64_have_wingcap = false;
 bool sm64_have_metalcap = false;
 bool sm64_have_vanishcap = false;
 bool sm64_have_cannon[15];
+int sm64_completion_type = 0;
 int* sm64_clockaction = nullptr;
 int sm64_cost_firstbowserdoor = 8;
 int sm64_cost_basementdoor = 30;
@@ -244,6 +245,10 @@ void SM64AP_SetStarsToFinish(int amount) {
     sm64_cost_endlessstairs = amount;
 }
 
+void SM64AP_SetCompletionType(int type) {
+    sm64_completion_type = type;
+}
+
 void SM64AP_SetCourseMap(std::map<int,int> map) {
     map_entrances = map;
 }
@@ -263,6 +268,19 @@ void SM64AP_ResetItems() {
     starsCollected = 0;
 }
 
+void SM64AP_SetReplyHandler(AP_SetReply reply) {
+    if (reply.key == AP_GetPrivateServerDataPrefix() + "FinishedBowser") {
+        switch (sm64_completion_type) {
+            case 0: // Only BitS
+                if (*(int*)(reply.value) == 0b100) AP_StoryComplete();
+                break;
+            case 1: // All Bowser Stages
+                if (*(int*)(reply.value) == 0b111) AP_StoryComplete();
+                break;
+        }
+    }
+}
+
 void SM64AP_GenericInit() {
     AP_NetworkVersion version = {0,3,5};
     AP_SetClientVersion(&version);
@@ -270,12 +288,16 @@ void SM64AP_GenericInit() {
     AP_SetItemClearCallback(&SM64AP_ResetItems);
     AP_SetLocationCheckedCallback(&SM64AP_CheckLocation);
     AP_SetItemRecvCallback(&SM64AP_RecvItem);
+    AP_RegisterSetReplyCallback(&SM64AP_SetReplyHandler);
+    AP_SetNotify(AP_GetPrivateServerDataPrefix() + "FinishedBowser", AP_DataType::Int);
+
     AP_RegisterSlotDataIntCallback("FirstBowserDoorCost", &SM64AP_SetFirstBowserDoorCost);
     AP_RegisterSlotDataIntCallback("BasementDoorCost", &SM64AP_SetBasementDoorCost);
     AP_RegisterSlotDataIntCallback("SecondFloorDoorCost", &SM64AP_SetSecondFloorDoorCost);
     AP_RegisterSlotDataIntCallback("MIPS1Cost", &SM64AP_SetMIPS1Cost);
     AP_RegisterSlotDataIntCallback("MIPS2Cost", &SM64AP_SetMIPS2Cost);
     AP_RegisterSlotDataIntCallback("StarsToFinish", &SM64AP_SetStarsToFinish);
+    AP_RegisterSlotDataIntCallback("CompletionType", &SM64AP_SetCompletionType);
     AP_RegisterSlotDataMapIntIntCallback("AreaRando", &SM64AP_SetCourseMap);
 
     course_dest_supported = {
@@ -335,8 +357,16 @@ void SM64AP_SendItem(int idx) {
     AP_SendItem(idx);
 }
 
-void SM64AP_StoryComplete() {
-    AP_StoryComplete();
+void SM64AP_FinishBowser(int i) {
+    AP_SetServerDataRequest req;
+    req.key = AP_GetPrivateServerDataPrefix() + "FinishedBowser";
+    int def_val = 0;
+    req.default_value = &def_val;
+    req.type = AP_DataType::Int;
+    req.want_reply = true;
+    int flag = i == 0 ? 0b001 : (i == 1 ? 0b010 : (i == 2 ? 0b100 : 0)); // Oh god this is ugly
+    req.operations = std::vector<AP_DataStorageOperation>{{{"or", &flag}}};
+    AP_SetServerData(&req);
 }
 
 int SM64AP_GetStars() {

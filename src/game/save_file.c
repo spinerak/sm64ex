@@ -511,6 +511,7 @@ void save_file_collect_star_or_key(s16 coinScore, s16 starIndex) {
                 save_file_set_flags(SAVE_FLAG_HAVE_KEY_1);
             }
             SM64AP_SendItem(SM64AP_ID_KEY1);
+            SM64AP_FinishBowser(0);
             break;
 
         case LEVEL_BOWSER_2:
@@ -518,10 +519,11 @@ void save_file_collect_star_or_key(s16 coinScore, s16 starIndex) {
                 save_file_set_flags(SAVE_FLAG_HAVE_KEY_2);
             }
             SM64AP_SendItem(SM64AP_ID_KEY2);
+            SM64AP_FinishBowser(1);
             break;
 
         case LEVEL_BOWSER_3:
-            SM64AP_StoryComplete();
+            SM64AP_FinishBowser(2);
             break;
 
         default:
