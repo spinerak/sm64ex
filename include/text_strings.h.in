@@ -34,6 +34,17 @@
 #else
 #define TEXT_CANYON _("Cannon Unlocked")
 #endif
+// Moves
+#define TEXT_TRIPLE_JUMP _("TRIPLE JUMP")
+#define TEXT_LONG_JUMP _("LONG JUMP")
+#define TEXT_BACKFLIP _("BACKFLIP")
+#define TEXT_SIDE_FLIP _("SIDE FLIP")
+#define TEXT_WALL_KICK _("WALL KICK")
+#define TEXT_DIVE _("DIVE")
+#define TEXT_GROUND_POUND _("GROUND POUND")
+#define TEXT_KICK _("KICK")
+#define TEXT_CLIMB _("CLIMB")
+#define TEXT_LEDGE_GRAB _("LEDGE GRAB")
 
 #if defined(VERSION_JP) || defined(VERSION_SH)
 

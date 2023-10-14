@@ -16,6 +16,16 @@ extern "C" {
 #define SM64AP_ID_METALCAP (SM64AP_ID_WINGCAP+1)
 #define SM64AP_ID_VANISHCAP (SM64AP_ID_METALCAP+1)
 #define SM64AP_ITEMID_1UP (SM64AP_ID_VANISHCAP+1)
+#define SM64AP_ID_TRIPLEJUMP (SM64AP_ID_OFFSET+185)
+#define SM64AP_ID_LONGJUMP (SM64AP_ID_TRIPLEJUMP+2)
+#define SM64AP_ID_BACKFLIP (SM64AP_ID_TRIPLEJUMP+3)
+#define SM64AP_ID_SIDEFLIP (SM64AP_ID_TRIPLEJUMP+4)
+#define SM64AP_ID_WALLKICK (SM64AP_ID_TRIPLEJUMP+5)
+#define SM64AP_ID_DIVE (SM64AP_ID_TRIPLEJUMP+6)
+#define SM64AP_ID_GROUNDPOUND (SM64AP_ID_TRIPLEJUMP+7)
+#define SM64AP_ID_KICK (SM64AP_ID_TRIPLEJUMP+8)
+#define SM64AP_ID_CLIMB (SM64AP_ID_TRIPLEJUMP+9)
+#define SM64AP_ID_LEDGEGRAB (SM64AP_ID_TRIPLEJUMP+10)
 
 #define SM64AP_ID_CANNONUNLOCK(x) (SM64AP_ID_OFFSET+200+x)
 
@@ -42,6 +52,21 @@ extern "C" bool SM64AP_HaveCannon(int);
 extern "C" bool SM64AP_DeathLinkPending();
 extern "C" void SM64AP_DeathLinkClear();
 extern "C" void SM64AP_DeathLinkSend();
+
+// Local Moves
+extern "C" bool SM64AP_MoveRandomizerActive();
+extern "C" bool SM64AP_CanDoubleJump();
+extern "C" bool SM64AP_CanTripleJump();
+extern "C" bool SM64AP_CanLongJump();
+extern "C" bool SM64AP_CanBackflip();
+extern "C" bool SM64AP_CanSideFlip();
+extern "C" bool SM64AP_CanWallKick();
+extern "C" bool SM64AP_CanDive();
+extern "C" bool SM64AP_CanGroundPound();
+extern "C" bool SM64AP_CanPunch();
+extern "C" bool SM64AP_CanKick();
+extern "C" bool SM64AP_CanClimb();
+extern "C" bool SM64AP_CanLedgeGrab();
 
 // Send Item
 extern "C" void SM64AP_SendByBoxID(int);
@@ -71,6 +96,19 @@ bool SM64AP_HaveCannon(int);
 bool SM64AP_DeathLinkPending();
 void SM64AP_DeathLinkClear();
 void SM64AP_DeathLinkSend();
+bool SM64AP_MoveRandomizerActive();
+bool SM64AP_CanDoubleJump();
+bool SM64AP_CanTripleJump();
+bool SM64AP_CanLongJump();
+bool SM64AP_CanBackflip();
+bool SM64AP_CanSideFlip();
+bool SM64AP_CanWallKick();
+bool SM64AP_CanDive();
+bool SM64AP_CanGroundPound();
+bool SM64AP_CanPunch();
+bool SM64AP_CanKick();
+bool SM64AP_CanClimb();
+bool SM64AP_CanLedgeGrab();
 void SM64AP_SendByBoxID(int);
 void SM64AP_SendItem(int);
 void SM64AP_PrintNext();
