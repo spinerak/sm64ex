@@ -12,9 +12,14 @@ extern "C" {
 #include <vector>
 #include <map>
 #include <cstdio>
+#include <bitset>
 #include <set>
 
 #define WARP_NODE_CREDITS_MIN 0xF8 // level_update.c
+
+// Set to false on some branch for compat with patches
+// Cant use constexpr cuz this gets included by C code as well
+static constexpr bool SM64AP_SUPPORT_MOVE_RANDO = true;
 
 int starsCollected = 0;
 bool sm64_locations[SM64AP_NUM_LOCS];
@@ -25,19 +30,7 @@ bool sm64_have_metalcap = false;
 bool sm64_have_vanishcap = false;
 bool sm64_have_cannon[15];
 int sm64_completion_type = 0;
-bool sm64_randomize_moves = true;
-bool sm64_can_doublejump = false;
-bool sm64_can_triplejump = false;
-bool sm64_can_longjump = false;
-bool sm64_can_backflip = false;
-bool sm64_can_sideflip = false;
-bool sm64_can_wallkick = false;
-bool sm64_can_dive = false;
-bool sm64_can_groundpound = false;
-bool sm64_can_punch = true; // Future unlock possibility
-bool sm64_can_kick = false;
-bool sm64_can_climb = false;
-bool sm64_can_ledgegrab = false;
+std::bitset<SM64AP_NUM_ABILITIES> sm64_have_abilities;
 int* sm64_clockaction = nullptr;
 int sm64_cost_firstbowserdoor = 8;
 int sm64_cost_basementdoor = 30;
@@ -84,38 +77,11 @@ void SM64AP_RecvItem(int64_t idx, bool notify) {
             gMarioState->numLives++;
             break;
         case SM64AP_ID_CANNONUNLOCK(0) ... SM64AP_ID_CANNONUNLOCK(15-1):
-            sm64_have_cannon[idx-SM64AP_ID_OFFSET-200] = true;
+            sm64_have_cannon[idx-(SM64AP_ID_CANNONUNLOCK(0))] = true;
             break;
-        case SM64AP_ID_TRIPLEJUMP:
-            sm64_can_doublejump = true;
-            sm64_can_triplejump = true;
+        case SM64AP_ID_ABILITY(0) ... SM64AP_ID_ABILITY(SM64AP_NUM_ABILITIES-1):
+            sm64_have_abilities[idx-(SM64AP_ID_ABILITY(0))] = true;
             break;
-        case SM64AP_ID_LONGJUMP:
-            sm64_can_longjump = true;
-            break;
-        case SM64AP_ID_BACKFLIP:
-            sm64_can_backflip = true;
-            break;
-        case SM64AP_ID_SIDEFLIP:
-            sm64_can_sideflip = true;
-            break;
-        case SM64AP_ID_WALLKICK:
-            sm64_can_wallkick = true;
-            break;
-        case SM64AP_ID_DIVE:
-            sm64_can_dive = true;
-            break;
-        case SM64AP_ID_GROUNDPOUND:
-            sm64_can_groundpound = true;
-            break;
-        case SM64AP_ID_KICK:
-            sm64_can_kick = true;
-            break;
-        case SM64AP_ID_CLIMB:
-            sm64_can_climb = true;
-            break;
-        case SM64AP_ID_LEDGEGRAB:
-            sm64_can_ledgegrab = true;
     }
 }
 
@@ -296,8 +262,10 @@ void SM64AP_SetCourseMap(std::map<int,int> map) {
     map_entrances = map;
 }
 
-void SM64AP_SetRandomizeMoves(int amount) {
-    sm64_randomize_moves = amount;
+void SM64AP_SetMoveRandoVec(int vec) {
+    for (int i = 0; i < SM64AP_NUM_ABILITIES; i++) {
+        sm64_have_abilities[i] = !std::bitset<SM64AP_NUM_ABILITIES>(vec).test(i) || sm64_have_abilities[i];
+    }
 }
 
 void SM64AP_ResetItems() {
@@ -307,23 +275,12 @@ void SM64AP_ResetItems() {
     for (int i = 0; i < 15; i++) {
         sm64_have_cannon[i] = false;
     }
+    sm64_have_abilities.reset();
     sm64_have_key1 = false;
     sm64_have_key2 = false;
     sm64_have_wingcap = false;
     sm64_have_metalcap = false;
     sm64_have_vanishcap = false;
-    sm64_can_doublejump = false;
-    sm64_can_triplejump = false;
-    sm64_can_longjump = false;
-    sm64_can_backflip = false;
-    sm64_can_sideflip = false;
-    sm64_can_wallkick = false;
-    sm64_can_dive = false;
-    sm64_can_groundpound = false;
-    sm64_can_punch = true; // Future unlock possibility
-    sm64_can_kick = false;
-    sm64_can_climb = false;
-    sm64_can_ledgegrab = false;
     starsCollected = 0;
 }
 
@@ -357,7 +314,7 @@ void SM64AP_GenericInit() {
     AP_RegisterSlotDataIntCallback("MIPS2Cost", &SM64AP_SetMIPS2Cost);
     AP_RegisterSlotDataIntCallback("StarsToFinish", &SM64AP_SetStarsToFinish);
     AP_RegisterSlotDataIntCallback("CompletionType", &SM64AP_SetCompletionType);
-    AP_RegisterSlotDataIntCallback("RandomizeMoves", &SM64AP_SetRandomizeMoves);
+    AP_RegisterSlotDataIntCallback("MoveRandoVec", &SM64AP_SetMoveRandoVec);
     AP_RegisterSlotDataMapIntIntCallback("AreaRando", &SM64AP_SetCourseMap);
 
     course_dest_supported = {
@@ -502,56 +459,49 @@ void SM64AP_DeathLinkSend() {
     }
 }
 
-bool SM64AP_MoveRandomizerActive() {
-    return sm64_randomize_moves;
-}
-
 bool SM64AP_CanDoubleJump() {
-    return sm64_can_doublejump || !sm64_randomize_moves;
+    #warning Use doublejump logic once implemented
+    return sm64_have_abilities[SM64AP_ID_TRIPLEJUMP - SM64AP_ABILITY_OFFSET];
 }
 
 bool SM64AP_CanTripleJump() {
-    return sm64_can_triplejump || !sm64_randomize_moves;
+    return sm64_have_abilities[SM64AP_ID_TRIPLEJUMP - SM64AP_ABILITY_OFFSET];
 }
 
 bool SM64AP_CanLongJump() {
-    return sm64_can_longjump || !sm64_randomize_moves;
+    return sm64_have_abilities[SM64AP_ID_LONGJUMP - SM64AP_ABILITY_OFFSET];
 }
 
 bool SM64AP_CanBackflip() {
-    return sm64_can_backflip || !sm64_randomize_moves;
+    return sm64_have_abilities[SM64AP_ID_BACKFLIP - SM64AP_ABILITY_OFFSET];
 }
 
 bool SM64AP_CanSideFlip() {
-    return sm64_can_sideflip || !sm64_randomize_moves;
+    return sm64_have_abilities[SM64AP_ID_SIDEFLIP - SM64AP_ABILITY_OFFSET];
 }
 
 bool SM64AP_CanWallKick() {
-    return sm64_can_wallkick || !sm64_randomize_moves;
+    return sm64_have_abilities[SM64AP_ID_WALLKICK - SM64AP_ABILITY_OFFSET];
 }
 
 bool SM64AP_CanDive() {
-    return sm64_can_dive || !sm64_randomize_moves;
+    return sm64_have_abilities[SM64AP_ID_DIVE - SM64AP_ABILITY_OFFSET];
 }
 
 bool SM64AP_CanGroundPound() {
-    return sm64_can_groundpound || !sm64_randomize_moves;
-}
-
-bool SM64AP_CanPunch() {
-    return sm64_can_punch || !sm64_randomize_moves;
+    return sm64_have_abilities[SM64AP_ID_GROUNDPOUND - SM64AP_ABILITY_OFFSET];
 }
 
 bool SM64AP_CanKick() {
-    return sm64_can_kick || !sm64_randomize_moves;
+    return sm64_have_abilities[SM64AP_ID_KICK - SM64AP_ABILITY_OFFSET];
 }
 
 bool SM64AP_CanClimb() {
-    return sm64_can_climb || !sm64_randomize_moves;
+    return sm64_have_abilities[SM64AP_ID_CLIMB - SM64AP_ABILITY_OFFSET];
 }
 
 bool SM64AP_CanLedgeGrab() {
-    return sm64_can_ledgegrab || !sm64_randomize_moves;
+    return sm64_have_abilities[SM64AP_ID_LEDGEGRAB - SM64AP_ABILITY_OFFSET];
 }
 
 
@@ -562,6 +512,10 @@ void SM64AP_PrintNext() {
     if (AP_GetConnectionStatus() == AP_ConnectionStatus::ConnectionRefused) {
         print_text(GFX_DIMENSIONS_FROM_LEFT_EDGE(SCREEN_WIDTH / 2) - 10, SCREEN_HEIGHT / 2, "CONNECTION REFUSED");
         print_text(GFX_DIMENSIONS_FROM_LEFT_EDGE(SCREEN_WIDTH / 2) - 10, SCREEN_HEIGHT / 2 - 20, "CHECK ARGS");
+    }
+    if (!sm64_have_abilities.all() && !SM64AP_SUPPORT_MOVE_RANDO) {
+        print_text(GFX_DIMENSIONS_FROM_LEFT_EDGE(SCREEN_WIDTH / 2) - 10, SCREEN_HEIGHT / 2, "INCOMPATIBLE WITH");
+        print_text(GFX_DIMENSIONS_FROM_LEFT_EDGE(SCREEN_WIDTH / 2) - 10, SCREEN_HEIGHT / 2 - 20, "MOUE RANDO");
     }
     if (!AP_IsMessagePending()) return;
     AP_Message* msg = AP_GetLatestMessage();
