@@ -167,16 +167,14 @@ void SM64AP_RedirectWarp(s16* curLevel, s16* destLevel, s8* curArea, s16* destAr
     if (*destWarpNode >= WARP_NODE_CREDITS_MIN) return; // Credit Warps
     if ((*curLevel == LEVEL_CASTLE || *curLevel == LEVEL_CASTLE_COURTYARD || *curLevel == LEVEL_CASTLE_GROUNDS || *curLevel == LEVEL_HMC) && 
          *destLevel != LEVEL_CASTLE && *destLevel != LEVEL_CASTLE_COURTYARD && *destLevel != LEVEL_CASTLE_GROUNDS) {
-        if (sm64_clockaction) *sm64_clockaction = 5;
+        SM64AP_SetClockToTTCState();
         int destination;
         switch (*destLevel) {
             case LEVEL_LLL:
             case LEVEL_SSL:
             case LEVEL_TTM:
-                destination = map_entrances[*destLevel * 10 + 1];
-                break;
             case LEVEL_COTMC:
-                destination = map_entrances[281];
+                destination = map_entrances[*destLevel * 10 + 1];
                 break;
             default:
                 if (*curLevel == LEVEL_HMC) return; // Safety Check: If in HMC only relevant warp is to COTMC
@@ -214,6 +212,10 @@ int SM64AP_CourseToTTC() {
 
 void SM64AP_SetClockToTTCAction(int* action) {
     sm64_clockaction = action;
+}
+
+void SM64AP_SetClockToTTCState() {
+    if (sm64_clockaction) *sm64_clockaction = 5;
 }
 
 void SM64AP_SetFirstBowserDoorCost(int amount) {

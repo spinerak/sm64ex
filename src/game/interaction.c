@@ -836,6 +836,8 @@ u32 interact_bbh_entrance(struct MarioState *m, UNUSED u32 interactType, struct 
         m->interactObj = o;
         m->usedObj = o;
 
+        SM64AP_SetClockToTTCState();
+
         if (m->action & ACT_FLAG_AIR) {
             return set_mario_action(m, ACT_BBH_ENTER_SPIN, 0);
         }
