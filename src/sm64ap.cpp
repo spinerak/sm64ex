@@ -1,6 +1,5 @@
 #include "sm64ap.h"
 #include "Archipelago.h"
-#include <cstdio>
 
 extern "C" {
     #include "game/print.h"
@@ -12,6 +11,8 @@ extern "C" {
 #include <string>
 #include <vector>
 #include <map>
+#include <cstdio>
+#include <set>
 
 #define WARP_NODE_CREDITS_MIN 0xF8 // level_update.c
 
@@ -34,8 +35,7 @@ int msg_frame_duration = 90; // 3 Secounds at 30F/s
 int cur_msg_frame_duration = msg_frame_duration;
 
 std::map<int,int> map_entrances;
-std::map<int,int> map_courseidx_coursenum;
-std::map<int,int> map_coursenum_courseidx;
+std::set<int> course_dest_supported;
 
 std::map<int,int> map_boxid_locid;
 
@@ -190,8 +190,8 @@ void SM64AP_RedirectWarp(s16* curLevel, s16* destLevel, s8* curArea, s16* destAr
         *destWarpNode = 0x0A;
         return;
     }
-    
-    if ((*destLevel == LEVEL_CASTLE || *destLevel == LEVEL_CASTLE_COURTYARD || *destLevel == LEVEL_CASTLE_GROUNDS) && map_coursenum_courseidx.count(*curLevel)) {
+
+    if ((*destLevel == LEVEL_CASTLE || *destLevel == LEVEL_CASTLE_COURTYARD || *destLevel == LEVEL_CASTLE_GROUNDS) && course_dest_supported.contains(*curLevel)) {
         if (*destLevel == LEVEL_CASTLE && (*destWarpNode == 0x1F || *destWarpNode == 0x00)) return; //Exit Course or Inter-Castle warp
         *destLevel = sm64_exit_return_to / 10;
         *destArea = sm64_exit_return_to % 10;
@@ -276,36 +276,11 @@ void SM64AP_GenericInit() {
     AP_RegisterSlotDataIntCallback("StarsToFinish", &SM64AP_SetStarsToFinish);
     AP_RegisterSlotDataMapIntIntCallback("AreaRando", &SM64AP_SetCourseMap);
 
-    map_courseidx_coursenum[0] = LEVEL_BOB;
-    map_courseidx_coursenum[1] = LEVEL_WF;
-    map_courseidx_coursenum[2] = LEVEL_JRB;
-    map_courseidx_coursenum[3] = LEVEL_CCM;
-    map_courseidx_coursenum[4] = LEVEL_BBH;
-    map_courseidx_coursenum[5] = LEVEL_HMC;
-    map_courseidx_coursenum[6] = LEVEL_LLL;
-    map_courseidx_coursenum[7] = LEVEL_SSL;
-    map_courseidx_coursenum[8] = LEVEL_DDD;
-    map_courseidx_coursenum[9] = LEVEL_SL;
-    map_courseidx_coursenum[10] = LEVEL_WDW;
-    map_courseidx_coursenum[11] = LEVEL_TTM;
-    map_courseidx_coursenum[12] = LEVEL_THI;
-    map_courseidx_coursenum[13] = LEVEL_TTC;
-    map_courseidx_coursenum[14] = LEVEL_RR;
-    map_courseidx_coursenum[15] = LEVEL_PSS;
-    map_courseidx_coursenum[16] = LEVEL_SA;
-    map_courseidx_coursenum[17] = LEVEL_BITDW;
-    map_courseidx_coursenum[18] = LEVEL_TOTWC;
-    map_courseidx_coursenum[19] = LEVEL_COTMC;
-    map_courseidx_coursenum[20] = LEVEL_VCUTM;
-    map_courseidx_coursenum[21] = LEVEL_BITFS;
-    map_courseidx_coursenum[22] = LEVEL_WMOTR;
-    map_courseidx_coursenum[23] = LEVEL_BOWSER_1;
-    map_courseidx_coursenum[24] = LEVEL_BOWSER_2;
-    map_courseidx_coursenum[25] = LEVEL_BOWSER_3;
-    for (auto itr : map_courseidx_coursenum) {
-        map_coursenum_courseidx[itr.second] = itr.first;
-    }
-    map_coursenum_courseidx[LEVEL_COTMC] = 5; //Map COTMC to HMC
+    course_dest_supported = {
+        LEVEL_BOB, LEVEL_WF, LEVEL_JRB, LEVEL_CCM, LEVEL_BBH, LEVEL_HMC, LEVEL_LLL, LEVEL_SSL, LEVEL_DDD, LEVEL_SL,
+        LEVEL_WDW, LEVEL_TTM, LEVEL_THI, LEVEL_TTC, LEVEL_RR, LEVEL_PSS, LEVEL_SA, LEVEL_BITDW, LEVEL_TOTWC, LEVEL_COTMC,
+        LEVEL_VCUTM, LEVEL_BITFS, LEVEL_WMOTR, LEVEL_BOWSER_1, LEVEL_BOWSER_2, LEVEL_BOWSER_3
+    };
     
     map_boxid_locid[LEVEL_CCM*10 + 1] = 3626215;
     map_boxid_locid[LEVEL_CCM*10 + 2] = 3626216;
