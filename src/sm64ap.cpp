@@ -18,7 +18,6 @@ extern "C" {
 #define WARP_NODE_CREDITS_MIN 0xF8 // level_update.c
 
 // Set to false on some branch for compat with patches
-// Cant use constexpr cuz this gets included by C code as well
 static constexpr bool SM64AP_SUPPORT_MOVE_RANDO = true;
 
 int starsCollected = 0;
