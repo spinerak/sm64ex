@@ -364,7 +364,7 @@ void SM64AP_FinishBowser(int i) {
     req.default_value = &def_val;
     req.type = AP_DataType::Int;
     req.want_reply = true;
-    int flag = i == 0 ? 0b001 : (i == 1 ? 0b010 : (i == 2 ? 0b100 : 0)); // Oh god this is ugly
+    int flag = 0b001 << i;
     req.operations = std::vector<AP_DataStorageOperation>{{{"or", &flag}}};
     AP_SetServerData(&req);
 }
