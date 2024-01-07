@@ -272,7 +272,7 @@ void SM64AP_SetReplyHandler(AP_SetReply reply) {
     if (reply.key == AP_GetPrivateServerDataPrefix() + "FinishedBowser") {
         switch (sm64_completion_type) {
             case 0: // Only BitS
-                if (*(int*)(reply.value) == 0b100) AP_StoryComplete();
+                if (*(int*)(reply.value) & 0b100 > 0) AP_StoryComplete();
                 break;
             case 1: // All Bowser Stages
                 if (*(int*)(reply.value) == 0b111) AP_StoryComplete();
