@@ -2,14 +2,14 @@
 
 // 0x04000000 # solid color blue - butt, left thigh, right thigh - all poly types
 static const Lights1 mario_blue_lights_group = gdSPDefLights1(
-    0x2a, 0x4f, 0x8e, // RGB values
-    0x4b, 0x9e, 0xff, 0x28, 0x28, 0x28
+    0x12, 0x24, 0x47, // RGB values
+    0x2a, 0x4f, 0x8e, 0x28, 0x28, 0x28
 );
 
 // 0x04000018 # solid color red - left & right arm, torso (tshirt part), caps - all poly types
 static const Lights1 mario_red_lights_group = gdSPDefLights1(
-    0x21, 0xac, 0x4a, // RGB values
-    0x42, 0xff, 0x8b, 0x28, 0x28, 0x28
+    0x11, 0x55, 0x25, // RGB values
+    0x21, 0xac, 0x4a, 0x28, 0x28, 0x28
 );
 
 // 0x04000030 # solid color white - metal butt & left thigh - normal left & right hand closed & open (with cap too) and all wings - all poly types
